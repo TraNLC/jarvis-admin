@@ -210,12 +210,12 @@ const JarvisFormat = () => {
                <tr><td colSpan={6} className="px-6 py-4 text-center text-dark-text-muted">Chưa có key nào được tạo.</td></tr>
             ) : keys.map((k, i) => (
               <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                <td className="px-6 py-4 font-mono text-teal-400">{k.license_key}</td>
-                <td className="px-6 py-4">{k.duration}</td>
+                <td className="px-6 py-4 font-mono text-teal-400">{k.key}</td>
+                <td className="px-6 py-4">{k.duration === 30 ? '1 Tháng' : k.duration === 90 ? '3 Tháng' : k.duration === 180 ? '6 Tháng' : k.duration === 365 ? '1 Năm' : 'Trọn đời'}</td>
                 <td className="px-6 py-4">
                   <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
-                    k.status === 'Đã kích hoạt' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                    k.status === 'Chưa sử dụng' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                    (k.activated_at ? 'Đã kích hoạt' : 'Chưa sử dụng') === 'Đã kích hoạt' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                    (k.activated_at ? 'Đã kích hoạt' : 'Chưa sử dụng') === 'Chưa sử dụng' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                     'bg-red-500/10 text-red-400 border-red-500/20'
                   }`}>
                     {k.status}
@@ -224,7 +224,7 @@ const JarvisFormat = () => {
                 <td className="px-6 py-4 font-mono text-xs text-dark-text-muted">{k.hwid || '---'}</td>
                 <td className="px-6 py-4 text-dark-text-muted">{new Date(k.created_at).toLocaleDateString('vi-VN')}</td>
                 <td className="px-6 py-4 text-right">
-                  <button onClick={() => handleDelete(k.id)} className="text-red-400 hover:text-red-300 font-medium text-sm transition-colors">Xóa</button>
+                  <button onClick={() => handleDelete(k.key)} className="text-red-400 hover:text-red-300 font-medium text-sm transition-colors">Xóa</button>
                 </td>
               </tr>
             ))}
