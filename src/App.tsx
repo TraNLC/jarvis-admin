@@ -57,7 +57,7 @@ const Dashboard = () => {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    fetch('http://146.235.20.33:3008/system')
+    fetch('http://146.235.20.33/system')
       .then(res => res.json())
       .then(data => {
         setSys(data);
