@@ -206,7 +206,7 @@ const JarvisFormat = () => {
           <tbody className="divide-y divide-dark-border">
             {loading ? (
                <tr><td colSpan={6} className="px-6 py-4 text-center text-dark-text-muted">Đang tải dữ liệu...</td></tr>
-            ) : keys.length === 0 ? (
+            ) : (!Array.isArray(keys) || keys.length === 0) ? (
                <tr><td colSpan={6} className="px-6 py-4 text-center text-dark-text-muted">Chưa có key nào được tạo.</td></tr>
             ) : keys.map((k, i) => (
               <tr key={i} className="hover:bg-white/[0.02] transition-colors">
