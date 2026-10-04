@@ -96,14 +96,27 @@ const Dashboard = () => {
           <h2 className="text-xl font-bold mb-4">Các dự án đang chạy</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {sys.containers.map((c: any, i: number) => (
-              <div key={i} className="bg-dark-surface border border-dark-border p-4 rounded-xl flex items-center justify-between shadow-lg">
-                <div>
-                  <h4 className="font-semibold text-white truncate max-w-[150px]" title={c.name}>{c.name}</h4>
-                  <p className="text-xs text-dark-text-muted mt-1 font-mono">{c.mem}</p>
+              <div key={i} className="bg-dark-surface border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-all hover:shadow-[0_0_15px_rgba(15,118,110,0.15)] group">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-semibold text-sm truncate max-w-[150px] group-hover:text-teal-400 transition-colors" title={c.name}>{c.name}</h3>
+                    <p className="text-xs text-dark-text-muted mt-1 truncate max-w-[150px]">{c.status}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`w-2 h-2 rounded-full ${c.status.includes('Up') ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-red-500'}`}></div>
+                    <span className={`text-xs font-medium ${c.status.includes('Up') ? 'text-emerald-400' : 'text-red-400'}`}>{c.status.includes('Up') ? 'LIVE' : 'OFF'}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${c.status.includes('Up') ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
-                  <span className="text-xs font-medium text-dark-text-muted">{c.status.includes('Up') ? 'LIVE' : 'OFF'}</span>
+                <div className="flex items-center gap-4 text-xs font-medium bg-dark-bg p-2 rounded-lg border border-dark-border/50">
+                   <div className="flex items-center gap-1.5">
+                      <span className="text-dark-text-muted">CPU:</span>
+                      <span className="text-blue-400">{c.cpu || '0.00%'}</span>
+                   </div>
+                   <div className="w-px h-3 bg-dark-border"></div>
+                   <div className="flex items-center gap-1.5">
+                      <span className="text-dark-text-muted">RAM:</span>
+                      <span className="text-purple-400">{c.mem || '---'}</span>
+                   </div>
                 </div>
               </div>
             ))}
