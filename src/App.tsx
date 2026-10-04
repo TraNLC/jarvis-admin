@@ -94,32 +94,39 @@ const Dashboard = () => {
           </div>
           
           <h2 className="text-xl font-bold mb-4">Các dự án đang chạy</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sys.containers.map((c: any, i: number) => (
-              <div key={i} className="bg-dark-surface border border-dark-border rounded-xl p-4 flex flex-col justify-between hover:border-primary/50 transition-all hover:shadow-[0_0_15px_rgba(15,118,110,0.15)] group">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-semibold text-sm truncate max-w-[150px] group-hover:text-teal-400 transition-colors" title={c.name}>{c.name}</h3>
-                    <p className="text-xs text-dark-text-muted mt-1 truncate max-w-[150px]">{c.status}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-2 h-2 rounded-full ${c.status.includes('Up') ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-red-500'}`}></div>
-                    <span className={`text-xs font-medium ${c.status.includes('Up') ? 'text-emerald-400' : 'text-red-400'}`}>{c.status.includes('Up') ? 'LIVE' : 'OFF'}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 text-xs font-medium bg-dark-bg p-2 rounded-lg border border-dark-border/50">
-                   <div className="flex items-center gap-1.5">
-                      <span className="text-dark-text-muted">CPU:</span>
-                      <span className="text-blue-400">{c.cpu || '0.00%'}</span>
-                   </div>
-                   <div className="w-px h-3 bg-dark-border"></div>
-                   <div className="flex items-center gap-1.5">
-                      <span className="text-dark-text-muted">RAM:</span>
-                      <span className="text-purple-400">{c.mem || '---'}</span>
-                   </div>
-                </div>
-              </div>
-            ))}
+          <div className="bg-dark-surface border border-dark-border rounded-xl overflow-hidden shadow-xl">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-white/5 border-b border-dark-border">
+                <tr>
+                  <th className="px-6 py-4 font-semibold text-dark-text-muted">Tên dự án</th>
+                  <th className="px-6 py-4 font-semibold text-dark-text-muted">Trạng thái</th>
+                  <th className="px-6 py-4 font-semibold text-dark-text-muted">CPU</th>
+                  <th className="px-6 py-4 font-semibold text-dark-text-muted">RAM</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-dark-border">
+                {sys.containers.map((c: any, i: number) => (
+                  <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-6 py-4 font-semibold text-white group-hover:text-teal-400 transition-colors">{c.name}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full ${c.status.includes('Up') ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-red-500'}`}></div>
+                        <div>
+                          <span className={`text-xs font-bold uppercase tracking-wider block ${c.status.includes('Up') ? 'text-emerald-400' : 'text-red-400'}`}>{c.status.includes('Up') ? 'LIVE' : 'OFF'}</span>
+                          <span className="text-xs text-dark-text-muted">{c.status}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-1 rounded text-xs font-mono">{c.cpu || '0.00%'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-1 rounded text-xs font-mono">{c.mem || '---'}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </>
       )}
