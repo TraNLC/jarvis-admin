@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  dashboard:
+    build: .
+    restart: always
+    ports:
+      - "127.0.0.1:3006:80"
