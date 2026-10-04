@@ -189,10 +189,11 @@ const JarvisFormat = () => {
   const [amount, setAmount] = React.useState(1);
   const [loading, setLoading] = React.useState(true);
   const API_URL = 'http://146.235.20.33:3005/jarvis-format/api';
+  const AUTH_HEADER = { 'Authorization': 'Basic YWRtaW46YWRtaW5AMTIz' }; // admin:admin@123 in base64
 
   const fetchKeys = async () => {
     try {
-      const res = await fetch(`${API_URL}/keys`);
+      const res = await fetch(`${API_URL}/keys`, { headers: AUTH_HEADER });
       const data = await res.json();
       setKeys(data);
       setLoading(false);
@@ -208,10 +209,16 @@ const JarvisFormat = () => {
 
   const handleCreateKey = async () => {
     try {
-      await fetch(`${API_URL}/keys/generate`, {
+      let durationDays = 0;
+      if (duration === '1 Tháng') durationDays = 30;
+      else if (duration === '3 Tháng') durationDays = 90;
+      else if (duration === '6 Tháng') durationDays = 180;
+      else if (duration === '1 Năm') durationDays = 365;
+
+      await fetch(`${API_URL}/keys`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ duration, amount })
+        headers: { ...AUTH_HEADER, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration: durationDays, amount })
       });
       fetchKeys(); // Refresh list
     } catch (err) {
@@ -219,10 +226,10 @@ const JarvisFormat = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if(!window.confirm('Bạn có chắc chắn muốn xóa key này?')) return;
     try {
-      await fetch(`${API_URL}/keys/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/keys/${id}`, { method: 'DELETE', headers: AUTH_HEADER });
       fetchKeys();
     } catch (err) {
       console.error(err);
