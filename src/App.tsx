@@ -52,23 +52,67 @@ const Sidebar = () => {
   );
 };
 
-const Dashboard = () => (
-  <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-    <h2 className="text-2xl font-bold mb-6">Tổng quan hệ thống</h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {[
-        { label: 'Tổng số Key', value: '1,248', color: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-500/20', text: 'text-blue-400' },
-        { label: 'Key đang hoạt động', value: '892', color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400' },
-        { label: 'Doanh thu tháng', value: '45M ₫', color: 'from-purple-500/20 to-purple-500/5', border: 'border-purple-500/20', text: 'text-purple-400' }
-      ].map((stat, i) => (
-        <div key={i} className={`bg-gradient-to-br ${stat.color} border ${stat.border} rounded-xl p-6 backdrop-blur-sm`}>
-          <p className="text-dark-text-muted font-medium mb-2">{stat.label}</p>
-          <h3 className={`text-3xl font-bold ${stat.text}`}>{stat.value}</h3>
-        </div>
-      ))}
+const Dashboard = () => {
+  const [sys, setSys] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch('http://146.235.20.33:3008/system')
+      .then(res => res.json())
+      .then(data => {
+        setSys(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <h2 className="text-2xl font-bold mb-6">Tổng quan hệ thống VPS</h2>
+      {loading ? (
+        <div className="text-dark-text-muted">Đang phân tích tài nguyên hệ thống...</div>
+      ) : !sys ? (
+        <div className="text-red-400">Không thể kết nối đến máy chủ giám sát.</div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 rounded-xl p-6 backdrop-blur-sm">
+              <p className="text-dark-text-muted font-medium mb-2">CPU Usage</p>
+              <h3 className="text-3xl font-bold text-blue-400">{sys.cpu}%</h3>
+            </div>
+            <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/20 rounded-xl p-6 backdrop-blur-sm">
+              <p className="text-dark-text-muted font-medium mb-2">RAM ({sys.memTotal})</p>
+              <h3 className="text-3xl font-bold text-emerald-400">{sys.memUsed}</h3>
+            </div>
+            <div className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 rounded-xl p-6 backdrop-blur-sm">
+              <p className="text-dark-text-muted font-medium mb-2">Ổ cứng ({sys.diskTotal})</p>
+              <h3 className="text-3xl font-bold text-purple-400">{sys.diskUsed}</h3>
+            </div>
+          </div>
+          
+          <h2 className="text-xl font-bold mb-4">Các dự án đang chạy</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sys.containers.map((c: any, i: number) => (
+              <div key={i} className="bg-dark-surface border border-dark-border p-4 rounded-xl flex items-center justify-between shadow-lg">
+                <div>
+                  <h4 className="font-semibold text-white truncate max-w-[150px]" title={c.name}>{c.name}</h4>
+                  <p className="text-xs text-dark-text-muted mt-1 font-mono">{c.mem}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${c.status.includes('Up') ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
+                  <span className="text-xs font-medium text-dark-text-muted">{c.status.includes('Up') ? 'LIVE' : 'OFF'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 const JarvisFormat = () => {
   const [keys, setKeys] = React.useState<any[]>([]);
