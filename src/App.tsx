@@ -55,6 +55,7 @@ const Sidebar = () => {
 const Dashboard = () => {
   const [sys, setSys] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   React.useEffect(() => {
     fetch('http://146.235.20.33/system')
@@ -68,6 +69,30 @@ const Dashboard = () => {
         setLoading(false);
       });
   }, []);
+
+  const parseMem = (memStr: string) => {
+    if (!memStr || memStr === '---') return 0;
+    const num = parseFloat(memStr);
+    if (memStr.includes('GiB')) return num * 1024;
+    if (memStr.includes('KiB')) return num / 1024;
+    return num;
+  };
+
+  const getContainerType = (name: string) => {
+    const lowerName = name.toLowerCase();
+    const dbKeywords = ['db', 'mysql', 'mariadb', 'postgres', 'redis'];
+    return dbKeywords.some(kw => lowerName.includes(kw)) ? 'Database' : 'App / Web';
+  };
+
+  const filteredAndSortedContainers = React.useMemo(() => {
+    if (!sys?.containers) return [];
+    let list = sys.containers;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter((c: any) => c.name.toLowerCase().includes(q));
+    }
+    return list.sort((a: any, b: any) => parseMem(b.mem) - parseMem(a.mem));
+  }, [sys, searchQuery]);
 
   return (
     <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -93,38 +118,62 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <h2 className="text-xl font-bold mb-4">Các dự án đang chạy</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Các dự án đang chạy</h2>
+            <div className="relative w-64">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-dark-text-muted">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+              <input 
+                type="text" 
+                placeholder="Tìm kiếm dự án..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-dark-bg border border-dark-border text-white text-sm rounded-lg focus:ring-primary focus:border-primary block pl-10 p-2.5 transition-colors placeholder-dark-text-muted/50 outline-none"
+              />
+            </div>
+          </div>
+          
           <div className="bg-dark-surface border border-dark-border rounded-xl overflow-hidden shadow-xl">
             <table className="w-full text-left text-sm">
               <thead className="bg-white/5 border-b border-dark-border">
                 <tr>
                   <th className="px-6 py-4 font-semibold text-dark-text-muted">Tên dự án</th>
+                  <th className="px-6 py-4 font-semibold text-dark-text-muted">Phân loại</th>
                   <th className="px-6 py-4 font-semibold text-dark-text-muted">Trạng thái</th>
                   <th className="px-6 py-4 font-semibold text-dark-text-muted">CPU</th>
                   <th className="px-6 py-4 font-semibold text-dark-text-muted">RAM</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-border">
-                {sys.containers.map((c: any, i: number) => (
-                  <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
-                    <td className="px-6 py-4 font-semibold text-white group-hover:text-teal-400 transition-colors">{c.name}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${c.status.includes('Up') ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-red-500'}`}></div>
-                        <div>
-                          <span className={`text-xs font-bold uppercase tracking-wider block ${c.status.includes('Up') ? 'text-emerald-400' : 'text-red-400'}`}>{c.status.includes('Up') ? 'LIVE' : 'OFF'}</span>
-                          <span className="text-xs text-dark-text-muted">{c.status}</span>
+                {filteredAndSortedContainers.map((c: any, i: number) => {
+                  const type = getContainerType(c.name);
+                  return (
+                    <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
+                      <td className="px-6 py-4 font-semibold text-white group-hover:text-teal-400 transition-colors">{c.name}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded text-xs font-medium border ${type === 'Database' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                          {type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${c.status.includes('Up') ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-red-500'}`}></div>
+                          <div>
+                            <span className={`text-xs font-bold uppercase tracking-wider block ${c.status.includes('Up') ? 'text-emerald-400' : 'text-red-400'}`}>{c.status.includes('Up') ? 'LIVE' : 'OFF'}</span>
+                            <span className="text-xs text-dark-text-muted">{c.status}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-1 rounded text-xs font-mono">{c.cpu || '0.00%'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-1 rounded text-xs font-mono">{c.mem || '---'}</span>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-1 rounded text-xs font-mono">{c.cpu || '0.00%'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-1 rounded text-xs font-mono">{c.mem || '---'}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
